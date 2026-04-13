@@ -15,21 +15,61 @@ Pure-shell AI Agent for system ops engineers. ReAct reasoning + Loop autonomous 
 shellbot.sh (entry) → loop.sh (outer) → react.sh (inner) → tools/
 ```
 
+## Dependencies
+
+### CLI Tools (required)
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| bash 3.2+ | Runtime | macOS built-in |
+| curl | HTTP requests | macOS built-in |
+| python3 | HTML parsing, math eval | macOS built-in |
+| jq | JSON parsing | `brew install jq` |
+| timeout (GNU) | Tool execution timeout | `brew install coreutils` |
+
+```bash
+brew install jq coreutils
+```
+
+### CLI Tools (optional)
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| rich (Python) | Markdown rendering for final answers (code highlight, tables) | `pip3 install rich` |
+| gum | Spinner animation during LLM thinking | `brew install gum` |
+| ripgrep (rg) | Faster file content search (falls back to grep) | `brew install ripgrep` |
+
+```bash
+pip3 install rich
+brew install gum ripgrep
+```
+
+### API Keys (required)
+
+| Service | Variable | Purpose | Get |
+|---------|----------|---------|-----|
+| OpenRouter | `OPENROUTER_API_KEY` | LLM backend (required) | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| Tavily | `TAVILY_API_KEY` | Web search | [app.tavily.com](https://app.tavily.com) |
+| Jina | `JINA_API_KEY` | URL→markdown conversion | [jina.ai/api](https://jina.ai/api) |
+| Red Hat | `RH_USERNAME` / `RH_PASSWORD` | RH KB access | Your Red Hat account |
+
+OpenRouter is mandatory. Tavily/Jina/Red Hat are only needed if you use the corresponding tools.
+
 ## Quick Start
 
 ```bash
-# Install dependencies
+# 1. Install required CLI tools
 brew install jq coreutils
-pip3 install rich    # optional: markdown rendering for final answers
-brew install gum     # optional: spinner animation
-brew install ripgrep # optional: faster file search
 
-# Configure
+# 2. Configure API keys
 mkdir -p ~/.shellbot
 cp .env.example ~/.shellbot/.env
 # Edit ~/.shellbot/.env with your API keys
 
-# Run
+# Or use macOS Keychain instead of .env:
+security add-generic-password -s "shellbot-openrouter" -a "$USER" -w "sk-xxx"
+
+# 3. Run
 bash shellbot.sh              # interactive ReAct mode
 bash shellbot.sh --loop       # interactive Loop mode
 echo "query" | bash shellbot.sh --no-interactive  # pipe mode
