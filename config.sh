@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 SHELLBOT_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SHELLBOT_VERSION="0.2.0"
 
 # ===== API =====
 OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-}"
