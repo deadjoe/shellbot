@@ -54,7 +54,7 @@ ui_loop_header() {
 }
 
 ui_iteration() {
-  echo -e "${DIM}── ReAct Step $1/$2 ──${DIM}"
+  echo -e "${DIM}── Step $1/$2 ──${DIM}"
 }
 
 SHELLBOT_SPIN_PID=""

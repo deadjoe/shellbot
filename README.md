@@ -79,7 +79,7 @@ cp .env.example ~/.shellbot/.env
 security add-generic-password -s "shellbot-openrouter" -a "$USER" -w "sk-xxx"
 
 # 3. Run
-bash shellbot.sh              # interactive ReAct mode
+bash shellbot.sh              # interactive single-turn mode
 bash shellbot.sh --loop       # interactive Loop mode
 echo "query" | bash shellbot.sh --no-interactive  # pipe mode
 ```

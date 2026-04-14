@@ -8,7 +8,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/history.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/memory.sh"
 source "$SHELLBOT_HOME/prompts/system.sh"
 
-# Build messages array for ReAct loop with function calling
+# Build messages array for single-turn FC loop
 build_react_messages() {
   local user_msg="$1"
   local context="${2:-}"
@@ -48,7 +48,7 @@ $context"
   echo "$messages"
 }
 
-# Main ReAct loop using function calling
+# Main single-turn FC loop
 react_run() {
   local user_msg="$1"
   local context="${2:-}"
@@ -168,6 +168,6 @@ react_run() {
     fi
   done
 
-  ui_warning "Reached max ReAct iterations ($REACT_MAX_ITERATIONS)"
+  ui_warning "Reached max FC iterations ($REACT_MAX_ITERATIONS)"
   return 2
 }

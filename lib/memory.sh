@@ -26,11 +26,18 @@ SQL
   fi
 }
 
-# Escape single quotes for SQL
+# Escape strings for safe SQL insertion
+# Handles: single quotes, backslashes, null bytes, newlines
+# Compatible with bash 3.2 (macOS)
 _sql_escape() {
   local s="$1"
-  s="${s//\'/\'\'}"
-  echo "$s"
+  # Remove null bytes and replace newlines with spaces
+  s=$(printf '%s' "$s" | tr -d '\000' | tr '\n' ' ')
+  # Escape backslashes first (before quote escaping)
+  s=$(printf '%s' "$s" | sed 's/\\/\\\\/g')
+  # Escape single quotes (standard SQL: '' for ')
+  s=$(printf '%s' "$s" | sed "s/'/''/g")
+  printf '%s' "$s"
 }
 
 # Save a memory
@@ -46,9 +53,9 @@ memory_search() {
   local query="$1"
   local limit="${2:-5}"
   [ -z "$query" ] && return 0
-  # FTS5 MATCH: escape special chars, use simple term matching
+  # FTS5 MATCH: only allow alphanumeric and CJK chars, join with OR
   local safe_query
-  safe_query=$(echo "$query" | sed "s/['\"*(){}]//g" | awk '{for(i=1;i<=NF;i++) printf "%s OR ", $i; print ""}' | sed 's/ OR $//')
+  safe_query=$(echo "$query" | tr -cs '[:alnum:]一-龥ぁ-んァ-ヶ' ' ' | awk '{for(i=1;i<=NF;i++) printf "\"%s\" OR ", $i; print ""}' | sed 's/ OR $//')
   [ -z "$safe_query" ] && return 0
   sqlite3 "$MEMORY_DB" \
     "SELECT content FROM memories_fts WHERE memories_fts MATCH '$(_sql_escape "$safe_query")' ORDER BY rank LIMIT $limit;" 2>/dev/null

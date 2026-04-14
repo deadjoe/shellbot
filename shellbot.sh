@@ -162,7 +162,7 @@ while true; do
       ;;
     *)
       LAST_USER_MSG="$user_input"
-      react_run "$user_input" || ui_error "ReAct run failed"
+      react_run "$user_input" || ui_error "FC run failed"
       ;;
   esac
 done
