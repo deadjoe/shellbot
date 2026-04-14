@@ -1,19 +1,27 @@
 # ShellBot
 
-Pure-shell AI Agent for system ops engineers. ReAct reasoning + Loop autonomous task execution. Zero framework dependencies.
+Pure-shell AI Agent for system ops engineers. Function Calling + unified Loop execution. Zero framework dependencies.
 
 ## What It Does
 
 - **Local ops**: run shell commands, read/write/search files
 - **Web search**: Tavily search + JINA Reader for web pages
 - **Red Hat KB**: auto SSO login, search & read access.redhat.com articles
-- **Autonomous planning**: ReAct single-turn or Loop multi-turn with planner/reflector
+- **Autonomous planning**: Loop multi-turn with Function Calling + plan steps
+- **Cross-session memory**: SQLite3 + FTS5 persistent memory (save/search)
+- **Context compression**: LLM-based summarization when context exceeds limits
 
 ## Architecture
 
 ```
-shellbot.sh (entry) → loop.sh (outer) → react.sh (inner) → tools/
+shellbot.sh (entry)
+  → loop.sh (unified Loop: Function Calling + single conversation stream)
+    → tools.sh (dispatch) + tools_schema.sh (OpenAI schema generation)
+    → memory.sh (SQLite3 + FTS5) + compressor.sh (LLM summarization)
+    → history.sh + context.sh + security.sh + ui.sh
 ```
+
+No separate planner/reflector — Loop mode uses a single conversation stream with Function Calling throughout.
 
 ## Dependencies
 
@@ -25,6 +33,7 @@ shellbot.sh (entry) → loop.sh (outer) → react.sh (inner) → tools/
 | curl | HTTP requests | macOS built-in |
 | python3 | HTML parsing, math eval | macOS built-in |
 | jq | JSON parsing | `brew install jq` |
+| sqlite3 | Persistent memory (FTS5) | macOS built-in |
 | timeout (GNU) | Tool execution timeout | `brew install coreutils` |
 
 ```bash
@@ -116,6 +125,23 @@ Credential priority: env var → `.env` file → macOS Keychain.
 | `search_rhkb` | Search Red Hat KB |
 | `read_rhkb` | Read Red Hat KB article |
 | `calc` | Safe math evaluation |
+| `plan_step` | Declare current planning step (Loop) |
+| `save_memory` | Save fact to persistent memory |
+| `search_memory` | Search persistent memory (FTS5) |
+
+## Memory & Compression
+
+### Cross-session Memory (SQLite3 + FTS5)
+
+- `memory.sh` stores facts in a local SQLite database with full-text search
+- `save_memory` / `search_memory` tools let the agent persist & recall information
+- DB location: `~/.shellbot/memory.db`
+
+### Context Compression
+
+- `compressor.sh` triggers when conversation exceeds the configured token limit
+- Uses a lightweight LLM call to summarize older history into a compact summary
+- Compression runs automatically inside `history.sh` — transparent to the agent loop
 
 ## License
 
