@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# @tool Authenticate with Red Hat SSO (internal, not exposed to LLM)
 source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
 source "$SHELLBOT_HOME/lib/ui.sh"
 

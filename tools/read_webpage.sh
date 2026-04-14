@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @tool Read a webpage and convert to clean markdown using JINA Reader
+# @param url:string(required) The URL to read
 source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
 
 if [ -z "$JINA_API_KEY" ]; then

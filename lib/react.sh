@@ -3,85 +3,17 @@ source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/ui.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/api.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/tools.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/tools_schema.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/history.sh"
 source "$SHELLBOT_HOME/prompts/system.sh"
-source "$SHELLBOT_HOME/prompts/react_format.sh"
-source "$SHELLBOT_HOME/prompts/tools_desc.sh"
 
-react_parse() {
-  local response="$1"
-
-  local final_answer
-  final_answer=$(echo "$response" | awk '/^[Ff]inal [Aa]nswer:/ {sub(/^[Ff]inal [Aa]nswer:[[:space:]]*/, ""); print; exit}')
-
-  if [ -n "$final_answer" ]; then
-    echo "FINAL"
-    echo "$final_answer"
-    return 0
-  fi
-
-  local thought=""
-  local action=""
-  local action_input=""
-
-  local in_thought=false
-  local in_action=false
-  local in_action_input=false
-
-  while IFS= read -r line; do
-    if [[ "$line" =~ ^[Tt]hought:[[:space:]]*(.*) ]]; then
-      thought="${BASH_REMATCH[1]}"
-      in_thought=true
-      in_action=false
-      in_action_input=false
-    elif [[ "$line" =~ ^[Aa]ction\ [Ii]nput:[[:space:]]*(.*) ]]; then
-      action_input="${BASH_REMATCH[1]}"
-      in_thought=false
-      in_action=false
-      in_action_input=true
-    elif [[ "$line" =~ ^[Aa]ction:[[:space:]]*(.*) ]]; then
-      local captured="${BASH_REMATCH[1]}"
-      if [[ "$captured" =~ ^(.*)[Aa]ction\ [Ii]nput:[[:space:]]*(.*) ]]; then
-        action="${BASH_REMATCH[1]}"
-        action="$(echo "$action" | sed 's/[[:space:]]*$//')"
-        action_input="${BASH_REMATCH[2]}"
-      else
-        action="$captured"
-        action="$(echo "$action" | sed 's/[[:space:]]*$//')"
-      fi
-      in_thought=false
-      in_action=false
-      in_action_input=true
-    elif [ "$in_action_input" = true ] && [[ "$line" =~ ^[[:space:]]+(.*) ]]; then
-      action_input="$action_input ${BASH_REMATCH[1]}"
-    fi
-  done <<< "$response"
-
-  action_input="$(echo "$action_input" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-
-  if [ -z "$action" ]; then
-    echo "FINAL"
-    echo "$response"
-    return 0
-  fi
-
-  echo "ACTION"
-  echo "$thought"
-  echo "$action"
-  echo "$action_input"
-  return 0
-}
-
+# Build messages array for ReAct loop with function calling
 build_react_messages() {
   local user_msg="$1"
   local context="${2:-}"
 
   local system_prompt
-  system_prompt="$(prompt_system)
-
-$(prompt_tools_desc)
-
-$(prompt_react_format)"
+  system_prompt="$(prompt_system)"
 
   if [ -n "$context" ]; then
     system_prompt="$system_prompt
@@ -106,11 +38,15 @@ $context"
   echo "$messages"
 }
 
+# Main ReAct loop using function calling
 react_run() {
   local user_msg="$1"
   local context="${2:-}"
   local messages
   messages=$(build_react_messages "$user_msg" "$context")
+
+  local tools_schema
+  tools_schema=$(tools_get_schema)
 
   local iteration=0
   while [ $iteration -lt $REACT_MAX_ITERATIONS ]; do
@@ -118,13 +54,13 @@ react_run() {
     ui_iteration "$iteration" "$REACT_MAX_ITERATIONS"
     ui_thinking
 
-    local llm_response api_exit
+    local response api_exit
     if [ "$SHELLBOT_STREAM" = "true" ]; then
-      llm_response=$(api_chat_stream "$messages")
+      response=$(api_chat_stream_with_tools "$messages" "$tools_schema")
       api_exit=$?
       ui_done_thinking
     else
-      llm_response=$(api_chat "$messages")
+      response=$(api_chat_with_tools "$messages" "$tools_schema")
       api_exit=$?
       ui_done_thinking
     fi
@@ -134,65 +70,118 @@ react_run() {
       return 1
     fi
 
-    ui_debug "LLM response: $llm_response"
+    # Extract content and tool_calls from response
+    local content tool_calls
 
-    local parsed
-    parsed=$(react_parse "$llm_response")
-    local parse_type
-    parse_type=$(echo "$parsed" | head -1)
+    if [ "$SHELLBOT_STREAM" = "true" ]; then
+      # Stream response is our custom {content, tool_calls} JSON
+      content=$(echo "$response" | jq -r '.content // empty')
+      tool_calls=$(echo "$response" | jq '.tool_calls // empty')
+    else
+      # Non-stream response is raw API response
+      content=$(echo "$response" | jq -r '.choices[0].message.content // empty')
+      tool_calls=$(echo "$response" | jq '.choices[0].message.tool_calls // empty')
+    fi
 
-    case "$parse_type" in
-      FINAL)
-        local answer
-        answer=$(echo "$parsed" | tail -n +2)
-        if [ "$SHELLBOT_STREAM" != "true" ]; then
-          local thought_line
-          thought_line=$(echo "$llm_response" | awk '/^[Tt]hought:/ {sub(/^[Tt]hought:[[:space:]]*/, ""); print; exit}')
-          [ -n "$thought_line" ] && ui_thought "$thought_line"
-        fi
-        echo "" >&2
-        ui_final "$answer"
-        history_append "user" "$user_msg"
-        history_append "assistant" "$answer"
-        return 0
-        ;;
-      ACTION)
-        local thought
-        thought=$(echo "$parsed" | sed -n '2p')
-        local action
-        action=$(echo "$parsed" | sed -n '3p')
-        local action_input
-        action_input=$(echo "$parsed" | sed -n '4p')
+    ui_debug "Content: ${content:0:100}"
+    ui_debug "Tool calls: $tool_calls"
 
-        if [ "$SHELLBOT_STREAM" != "true" ]; then
-          [ -n "$thought" ] && ui_thought "$thought"
-          ui_action "$action" "$action_input"
-        fi
+    # Check if there are tool calls
+    local has_tool_calls=false
+    if [ -n "$tool_calls" ] && [ "$tool_calls" != "null" ] && [ "$tool_calls" != "[]" ]; then
+      has_tool_calls=true
+    fi
 
+    if [ "$has_tool_calls" = true ]; then
+      # Process each tool call
+      local assistant_msg
+      if [ "$SHELLBOT_STREAM" = "true" ]; then
+        # Build assistant message from stream data
+        assistant_msg=$(echo "$tool_calls" | jq \
+          --arg content "$content" \
+          '{role: "assistant", content: ($content // null), tool_calls: .}')
+      else
+        assistant_msg=$(echo "$response" | jq '.choices[0].message')
+      fi
+
+      messages=$(echo "$messages" | jq --argjson msg "$assistant_msg" '. + [$msg]')
+
+      # Execute each tool call and append results
+      local tc_count
+      tc_count=$(echo "$tool_calls" | jq 'length')
+      local tc_idx=0
+
+      while [ $tc_idx -lt $tc_count ]; do
+        local tc_id tc_name tc_args
+        tc_id=$(echo "$tool_calls" | jq -r ".[$tc_idx].id")
+        tc_name=$(echo "$tool_calls" | jq -r ".[$tc_idx].function.name")
+        tc_args=$(echo "$tool_calls" | jq -r ".[$tc_idx].function.arguments")
+
+        # Show what the agent is doing
+        ui_action "$tc_name" "$tc_args"
+
+        # Parse arguments: for simple tools, extract the single param value
+        # For multi-param tools (like write_file), pass the full JSON
+        local tool_input
+        tool_input=$(_parse_tool_input "$tc_name" "$tc_args")
+
+        # Execute tool
         local obs
-        obs=$(tool_execute "$action" "$action_input" 2>&1)
+        obs=$(tool_execute "$tc_name" "$tool_input" 2>&1)
         local tool_exit=$?
 
         if [ $tool_exit -ne 0 ] && [ -z "$obs" ]; then
-          obs="Error: Tool '$action' failed with exit code $tool_exit"
+          obs="Error: Tool '$tc_name' failed with exit code $tool_exit"
         fi
 
-        obs="Observation: $obs"
         ui_observation "$obs"
 
+        # Append tool result message
         messages=$(echo "$messages" | jq \
-          --arg assistant "$llm_response" \
-          --arg user "$obs" \
-          '. + [{"role":"assistant","content":$assistant}, {"role":"user","content":$user}]')
-        ;;
-      *)
-        ui_warning "Unexpected parse result, treating as final answer"
-        ui_final "$llm_response"
-        return 0
-        ;;
-    esac
+          --arg tc_id "$tc_id" \
+          --arg obs "$obs" \
+          '. + [{role: "tool", tool_call_id: $tc_id, content: $obs}]')
+
+        tc_idx=$((tc_idx + 1))
+      done
+
+    elif [ -n "$content" ]; then
+      # No tool calls, has content → Final Answer
+      ui_final "$content"
+      history_append "user" "$user_msg"
+      history_append "assistant" "$content"
+      return 0
+    else
+      # No content and no tool calls — shouldn't happen, treat as final
+      ui_warning "Empty response from LLM"
+      return 1
+    fi
   done
 
   ui_warning "Reached max ReAct iterations ($REACT_MAX_ITERATIONS)"
   return 2
+}
+
+# Parse tool arguments into the format expected by tool scripts
+# Most tools take a single string arg, write_file takes JSON
+_parse_tool_input() {
+  local tool_name="$1"
+  local args_json="$2"
+
+  case "$tool_name" in
+    write_file)
+      # write_file expects raw JSON: {"path": "...", "content": "..."}
+      echo "$args_json"
+      ;;
+    *)
+      # Single-param tools: extract the first (and usually only) param value
+      local first_val
+      first_val=$(echo "$args_json" | jq -r 'to_entries[0].value // .' 2>/dev/null)
+      if [ -n "$first_val" ] && [ "$first_val" != "null" ]; then
+        echo "$first_val"
+      else
+        echo "$args_json"
+      fi
+      ;;
+  esac
 }

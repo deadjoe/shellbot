@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @tool Perform a mathematical calculation safely
+# @param expression:string(required) The mathematical expression to evaluate
 python3 -c "
 import sys, ast
 try:

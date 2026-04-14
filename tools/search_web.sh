@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @tool Search the internet for information using Tavily
+# @param query:string(required) The search query
 source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
 
 if [ -z "$TAVILY_API_KEY" ]; then

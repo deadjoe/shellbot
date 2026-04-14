@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @tool Search Red Hat Knowledgebase for solutions
+# @param query:string(required) The search query
 source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
 source "$SHELLBOT_HOME/tools/rhkb_auth.sh"
 

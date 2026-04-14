@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @tool Read the full content of a Red Hat KB article
+# @param url:string(required) The KB article URL
 source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
 source "$SHELLBOT_HOME/tools/rhkb_auth.sh"
 

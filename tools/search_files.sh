@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-
+# @tool Search for a text pattern in files under current directory
+# @param pattern:string(required) The search pattern (regex)
 _search_bin=""
 if command -v rg >/dev/null 2>&1; then
   _search_bin="rg"

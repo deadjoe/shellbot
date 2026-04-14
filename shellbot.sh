@@ -11,10 +11,9 @@ source "$SHELLBOT_HOME/lib/loop.sh"
 source "$SHELLBOT_HOME/lib/context.sh"
 source "$SHELLBOT_HOME/lib/history.sh"
 source "$SHELLBOT_HOME/lib/tools.sh"
+source "$SHELLBOT_HOME/lib/tools_schema.sh"
 source "$SHELLBOT_HOME/lib/security.sh"
 source "$SHELLBOT_HOME/prompts/system.sh"
-source "$SHELLBOT_HOME/prompts/react_format.sh"
-source "$SHELLBOT_HOME/prompts/tools_desc.sh"
 
 LOOP_MODE=false
 NON_INTERACTIVE=false
