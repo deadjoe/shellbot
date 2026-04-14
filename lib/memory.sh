@@ -45,10 +45,11 @@ memory_save() {
 memory_search() {
   local query="$1"
   local limit="${2:-5}"
+  [ -z "$query" ] && return 0
   # FTS5 MATCH: escape special chars, use simple term matching
   local safe_query
   safe_query=$(echo "$query" | sed "s/['\"*(){}]//g" | awk '{for(i=1;i<=NF;i++) printf "%s OR ", $i; print ""}' | sed 's/ OR $//')
-  [ -z "$safe_query" ] && safe_query="$query"
+  [ -z "$safe_query" ] && return 0
   sqlite3 "$MEMORY_DB" \
     "SELECT content FROM memories_fts WHERE memories_fts MATCH '$(_sql_escape "$safe_query")' ORDER BY rank LIMIT $limit;" 2>/dev/null
 }
@@ -62,6 +63,8 @@ memory_list() {
 # Delete a memory by ID
 memory_delete() {
   local id="$1"
+  # Validate id is a number to prevent SQL injection
+  [[ "$id" =~ ^[0-9]+$ ]] || return 1
   sqlite3 "$MEMORY_DB" "DELETE FROM memories WHERE id = $id;" 2>/dev/null
 }
 

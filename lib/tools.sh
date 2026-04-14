@@ -45,14 +45,14 @@ _run_with_timeout() {
 }
 
 # Parse tool arguments into the format expected by tool scripts
-# Most tools take a single string arg, write_file takes JSON
+# Multi-param tools get raw JSON; single-param tools get the extracted value
 parse_tool_input() {
   local tool_name="$1"
   local args_json="$2"
 
   case "$tool_name" in
-    write_file)
-      # write_file expects raw JSON: {"path": "...", "content": "..."}
+    write_file|save_memory|search_memory)
+      # These tools expect raw JSON and parse it internally
       echo "$args_json"
       ;;
     *)
