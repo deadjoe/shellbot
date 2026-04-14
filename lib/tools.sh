@@ -3,7 +3,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/ui.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/security.sh"
 
-TOOL_NAMES="calc list_files read_file read_rhkb read_webpage run_shell search_files search_rhkb search_web write_file"
+TOOL_NAMES="calc list_files plan_step read_file read_rhkb read_webpage run_shell search_files search_rhkb search_web write_file"
 
 tools_list() {
   echo "$TOOL_NAMES" | tr ' ' '\n' | sort
@@ -42,6 +42,30 @@ _run_with_timeout() {
     wait "$pid"
     return $?
   fi
+}
+
+# Parse tool arguments into the format expected by tool scripts
+# Most tools take a single string arg, write_file takes JSON
+parse_tool_input() {
+  local tool_name="$1"
+  local args_json="$2"
+
+  case "$tool_name" in
+    write_file)
+      # write_file expects raw JSON: {"path": "...", "content": "..."}
+      echo "$args_json"
+      ;;
+    *)
+      # Single-param tools: extract the first (and usually only) param value
+      local first_val
+      first_val=$(echo "$args_json" | jq -r 'to_entries[0].value // .' 2>/dev/null)
+      if [ -n "$first_val" ] && [ "$first_val" != "null" ]; then
+        echo "$first_val"
+      else
+        echo "$args_json"
+      fi
+      ;;
+  esac
 }
 
 tool_execute() {

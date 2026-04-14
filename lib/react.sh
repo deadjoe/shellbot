@@ -74,11 +74,9 @@ react_run() {
     local content tool_calls
 
     if [ "$SHELLBOT_STREAM" = "true" ]; then
-      # Stream response is our custom {content, tool_calls} JSON
       content=$(echo "$response" | jq -r '.content // empty')
       tool_calls=$(echo "$response" | jq '.tool_calls // empty')
     else
-      # Non-stream response is raw API response
       content=$(echo "$response" | jq -r '.choices[0].message.content // empty')
       tool_calls=$(echo "$response" | jq '.choices[0].message.tool_calls // empty')
     fi
@@ -96,7 +94,6 @@ react_run() {
       # Process each tool call
       local assistant_msg
       if [ "$SHELLBOT_STREAM" = "true" ]; then
-        # Build assistant message from stream data
         assistant_msg=$(echo "$tool_calls" | jq \
           --arg content "$content" \
           '{role: "assistant", content: ($content // null), tool_calls: .}')
@@ -120,10 +117,9 @@ react_run() {
         # Show what the agent is doing
         ui_action "$tc_name" "$tc_args"
 
-        # Parse arguments: for simple tools, extract the single param value
-        # For multi-param tools (like write_file), pass the full JSON
+        # Parse arguments using shared function
         local tool_input
-        tool_input=$(_parse_tool_input "$tc_name" "$tc_args")
+        tool_input=$(parse_tool_input "$tc_name" "$tc_args")
 
         # Execute tool
         local obs
@@ -160,28 +156,4 @@ react_run() {
 
   ui_warning "Reached max ReAct iterations ($REACT_MAX_ITERATIONS)"
   return 2
-}
-
-# Parse tool arguments into the format expected by tool scripts
-# Most tools take a single string arg, write_file takes JSON
-_parse_tool_input() {
-  local tool_name="$1"
-  local args_json="$2"
-
-  case "$tool_name" in
-    write_file)
-      # write_file expects raw JSON: {"path": "...", "content": "..."}
-      echo "$args_json"
-      ;;
-    *)
-      # Single-param tools: extract the first (and usually only) param value
-      local first_val
-      first_val=$(echo "$args_json" | jq -r 'to_entries[0].value // .' 2>/dev/null)
-      if [ -n "$first_val" ] && [ "$first_val" != "null" ]; then
-        echo "$first_val"
-      else
-        echo "$args_json"
-      fi
-      ;;
-  esac
 }

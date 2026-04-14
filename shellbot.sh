@@ -88,7 +88,7 @@ while true; do
     /skip)
       if [ "$LOOP_MODE" = true ]; then
         loop_skip
-        ui_info "Will skip current sub-goal"
+        ui_info "Will skip current step"
       else
         ui_info "/skip only works in loop mode"
       fi
@@ -96,7 +96,7 @@ while true; do
     /stop)
       if [ "$LOOP_MODE" = true ]; then
         loop_stop
-        ui_info "Will stop after current sub-goal"
+        ui_info "Will stop after current step"
       else
         ui_info "/stop only works in loop mode"
       fi
