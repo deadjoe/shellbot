@@ -122,12 +122,24 @@ api_chat_stream_with_tools() {
       # Collect tool calls from stream
       local tool_calls_json="{}"
 
+      local midstream_error=false
+      # Save SSE for debugging if stream produces empty result
+      local sse_debug_file="/tmp/shellbot_last_sse_debug.txt"
       while IFS= read -r line; do
         line="${line%$'\r'}"
         [[ "$line" != data:* ]] && continue
         local payload="${line#data:}"
         payload="${payload# }"
         [ "$payload" = "[DONE]" ] && break
+
+        # Detect midstream errors (e.g. MiniMax "chat content is empty")
+        if echo "$payload" | jq -e '.error // empty' >/dev/null 2>&1; then
+          local err_msg
+          err_msg=$(echo "$payload" | jq -r '.error.message // "unknown stream error"')
+          echo "WARNING: Stream midstream error: $err_msg" >&2
+          midstream_error=true
+          break
+        fi
 
         # Content delta
         local content
@@ -195,12 +207,57 @@ api_chat_stream_with_tools() {
         printf '%s' "${NC}" >&2
       fi
 
-      rm -f "$tmp_err" "$tmp_sse"
-
-      # Return JSON with content and tool_calls
+      # If stream produced no content and no tool_calls, fall back to non-streaming
+      # (some models like MiniMax intermittently return empty stream results)
       local tool_calls_array
       tool_calls_array=$(echo "$tool_calls_json" | jq 'to_entries | map({id: .value.id, type: "function", function: {name: .value.name, arguments: .value.arguments}})')
 
+      if [ -z "$content_accumulated" ] && [ "$(echo "$tool_calls_array" | jq 'length')" = "0" ]; then
+        echo "WARNING: Stream returned empty result, falling back to non-streaming..." >&2
+        cp "$tmp_sse" "$sse_debug_file" 2>/dev/null
+        rm -f "$tmp_err" "$tmp_sse"
+        local ns_response
+        ns_response=$(api_chat_with_tools "$messages" "$tools" "$model")
+        local ns_exit=$?
+        if [ $ns_exit -ne 0 ]; then
+          return 1
+        fi
+        local ns_content ns_tool_calls
+        ns_content=$(echo "$ns_response" | jq -r '.choices[0].message.content // ""')
+        ns_tool_calls=$(echo "$ns_response" | jq '.choices[0].message.tool_calls // []')
+        ns_tool_calls=$(echo "$ns_tool_calls" | jq 'map({id, type, function: {name: .function.name, arguments: .function.arguments}})')
+        jq -n \
+          --arg content "$ns_content" \
+          --argjson tool_calls "$ns_tool_calls" \
+          '{content: $content, tool_calls: $tool_calls}'
+        return 0
+      fi
+
+      rm -f "$tmp_err" "$tmp_sse"
+
+      # If midstream error detected, fall back to non-streaming
+      if [ "$midstream_error" = true ]; then
+        echo "WARNING: Falling back to non-streaming request..." >&2
+        local ns_response
+        ns_response=$(api_chat_with_tools "$messages" "$tools" "$model")
+        local ns_exit=$?
+        if [ $ns_exit -ne 0 ]; then
+          return 1
+        fi
+        # Convert non-stream response format to stream format {content, tool_calls}
+        local ns_content ns_tool_calls
+        ns_content=$(echo "$ns_response" | jq -r '.choices[0].message.content // ""')
+        ns_tool_calls=$(echo "$ns_response" | jq '.choices[0].message.tool_calls // []')
+        # Normalize tool_calls to stream format (strip index field)
+        ns_tool_calls=$(echo "$ns_tool_calls" | jq 'map({id, type, function: {name: .function.name, arguments: .function.arguments}})')
+        jq -n \
+          --arg content "$ns_content" \
+          --argjson tool_calls "$ns_tool_calls" \
+          '{content: $content, tool_calls: $tool_calls}'
+        return 0
+      fi
+
+      # Return JSON with content and tool_calls
       jq -n \
         --arg content "$content_accumulated" \
         --argjson tool_calls "$tool_calls_array" \

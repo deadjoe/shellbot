@@ -70,6 +70,7 @@ loop_run() {
 
     ui_loop_header "$iteration" "$LOOP_MAX_ITERATIONS"
     LOOP_SKIP_REQUESTED=false
+    _empty_response_retries=0
 
     # Call LLM with tools
     local response api_exit
@@ -109,11 +110,14 @@ loop_run() {
       # Build assistant message and append to conversation
       local assistant_msg
       if [ "$SHELLBOT_STREAM" = "true" ]; then
+        # content:null is correct per OpenAI spec; just ensure it stays null not ""
         assistant_msg=$(echo "$tool_calls" | jq \
           --arg content "$content" \
-          '{role: "assistant", content: ($content // null), tool_calls: .}')
+          '{role: "assistant", content: (if $content == "" then null else $content end), tool_calls: .}')
       else
-        assistant_msg=$(echo "$response" | jq '.choices[0].message')
+        # Strip non-standard fields (reasoning, refusal, reasoning_details, etc.)
+        # Some models (MiniMax) return 0 tokens if these are present in the message history
+        assistant_msg=$(echo "$response" | jq '.choices[0].message | {role, content, tool_calls}')
       fi
       messages=$(echo "$messages" | jq --argjson msg "$assistant_msg" '. + [$msg]')
 
@@ -175,7 +179,18 @@ loop_run() {
       history_append "assistant" "$content"
       return 0
     else
-      ui_warning "Empty response from LLM"
+      # Empty response — retry with nudge instead of giving up immediately
+      local empty_retries=${_empty_response_retries:-0}
+      if [ $empty_retries -lt 2 ]; then
+        _empty_response_retries=$((empty_retries + 1))
+        ui_warning "Empty response from LLM (retry $((empty_retries + 1))/2)"
+        # Add a nudge message to encourage the model to respond
+        messages=$(echo "$messages" | jq \
+          --arg nudge "Please continue working on the goal. Respond with either a tool call or a final answer." \
+          '. + [{role: "user", content: $nudge}]')
+        continue
+      fi
+      ui_warning "Empty response from LLM after retries"
       break
     fi
   done
