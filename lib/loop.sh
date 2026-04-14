@@ -6,6 +6,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/context.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/tools.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/tools_schema.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/history.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/memory.sh"
 source "$SHELLBOT_HOME/prompts/loop_system.sh"
 
 LOOP_SKIP_REQUESTED=false
@@ -25,6 +26,15 @@ build_loop_messages() {
 
   local system_prompt
   system_prompt="$(prompt_loop_system "$goal")"
+
+  # Inject relevant memories
+  local mem_context
+  mem_context=$(memory_prefetch "$goal")
+  if [ -n "$mem_context" ]; then
+    system_prompt="$system_prompt
+
+$mem_context"
+  fi
 
   local messages
   messages=$(jq -n --arg system "$system_prompt" \
@@ -54,6 +64,10 @@ loop_run() {
     fi
 
     iteration=$((iteration + 1))
+
+    # Check if history needs compression
+    history_compress
+
     ui_loop_header "$iteration" "$LOOP_MAX_ITERATIONS"
     LOOP_SKIP_REQUESTED=false
 

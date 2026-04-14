@@ -3,7 +3,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/ui.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/security.sh"
 
-TOOL_NAMES="calc list_files plan_step read_file read_rhkb read_webpage run_shell search_files search_rhkb search_web write_file"
+TOOL_NAMES="calc list_files plan_step read_file read_rhkb read_webpage run_shell save_memory search_files search_memory search_rhkb search_web write_file"
 
 tools_list() {
   echo "$TOOL_NAMES" | tr ' ' '\n' | sort

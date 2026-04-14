@@ -10,6 +10,7 @@ source "$SHELLBOT_HOME/lib/react.sh"
 source "$SHELLBOT_HOME/lib/loop.sh"
 source "$SHELLBOT_HOME/lib/context.sh"
 source "$SHELLBOT_HOME/lib/history.sh"
+source "$SHELLBOT_HOME/lib/memory.sh"
 source "$SHELLBOT_HOME/lib/tools.sh"
 source "$SHELLBOT_HOME/lib/tools_schema.sh"
 source "$SHELLBOT_HOME/lib/security.sh"
@@ -17,6 +18,7 @@ source "$SHELLBOT_HOME/prompts/system.sh"
 
 LOOP_MODE=false
 NON_INTERACTIVE=false
+LAST_USER_MSG=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -31,9 +33,21 @@ done
 
 config_init
 history_init
+memory_init
+
+# Cleanup: auto-extract memories on exit
+_shellbot_exit() {
+  if [ -n "$LAST_USER_MSG" ]; then
+    local hist
+    hist=$(history_get_messages 10)
+    memory_extract "$hist" 2>/dev/null
+  fi
+}
+trap _shellbot_exit EXIT
 
 if [ "$NON_INTERACTIVE" = true ]; then
   input=$(cat)
+  LAST_USER_MSG="$input"
   if [ "$LOOP_MODE" = true ]; then
     loop_run "$input"
   else
@@ -85,6 +99,23 @@ while true; do
         ui_info "No active loop context"
       fi
       ;;
+    /memories)
+      local_list=$(memory_list)
+      if [ -n "$local_list" ]; then
+        echo "$local_list"
+      else
+        ui_info "No memories stored yet"
+      fi
+      ;;
+    /forget\ *)
+      mid="${user_input#/forget }"
+      if [ -n "$mid" ] && [ "$mid" -eq "$mid" ] 2>/dev/null; then
+        memory_delete "$mid"
+        ui_success "Memory #$mid deleted"
+      else
+        ui_error "Usage: /forget <id>"
+      fi
+      ;;
     /skip)
       if [ "$LOOP_MODE" = true ]; then
         loop_skip
@@ -113,6 +144,7 @@ while true; do
     /loop\ *)
       goal="${user_input#/loop }"
       LOOP_MODE=true
+      LAST_USER_MSG="$goal"
       loop_run "$goal" || ui_error "Loop run failed"
       LOOP_MODE=false
       ;;
@@ -120,6 +152,7 @@ while true; do
       read -ep "Goal: " goal
       if [ -n "$goal" ]; then
         LOOP_MODE=true
+        LAST_USER_MSG="$goal"
         loop_run "$goal" || ui_error "Loop run failed"
         LOOP_MODE=false
       fi
@@ -128,6 +161,7 @@ while true; do
       ui_error "Unknown command: $user_input. Type /help for available commands."
       ;;
     *)
+      LAST_USER_MSG="$user_input"
       react_run "$user_input" || ui_error "ReAct run failed"
       ;;
   esac

@@ -31,9 +31,15 @@ SHELL_CONFIRM="${SHELL_CONFIRM:-auto}"
 SHELL_DANGEROUS_PATTERNS="rm -rf |rm -f /|mkfs|dd if=|> /dev/sd|shutdown|reboot|init 0|init 6|:(){:|:&};:|chmod -R 777 /|chown -R|passwd|userdel|groupdel"
 
 # ===== Data =====
+
 SHELLBOT_DATA_DIR="${SHELLBOT_DATA_DIR:-$HOME/.shellbot}"
 HISTORY_FILE="$SHELLBOT_DATA_DIR/history.json"
 CONTEXT_FILE="$SHELLBOT_DATA_DIR/context.json"
+
+MEMORY_DB="$SHELLBOT_DATA_DIR/memories.db"
+HISTORY_COMPRESS_THRESHOLD="${HISTORY_COMPRESS_THRESHOLD:-30000}"
+HISTORY_COMPRESS_KEEP="${HISTORY_COMPRESS_KEEP:-10}"
+
 
 # ===== Load .env =====
 load_env() {

@@ -5,6 +5,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/api.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/tools.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/tools_schema.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/history.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/memory.sh"
 source "$SHELLBOT_HOME/prompts/system.sh"
 
 # Build messages array for ReAct loop with function calling
@@ -14,6 +15,15 @@ build_react_messages() {
 
   local system_prompt
   system_prompt="$(prompt_system)"
+
+  # Inject relevant memories
+  local mem_context
+  mem_context=$(memory_prefetch "$user_msg")
+  if [ -n "$mem_context" ]; then
+    system_prompt="$system_prompt
+
+$mem_context"
+  fi
 
   if [ -n "$context" ]; then
     system_prompt="$system_prompt
@@ -51,6 +61,10 @@ react_run() {
   local iteration=0
   while [ $iteration -lt $REACT_MAX_ITERATIONS ]; do
     iteration=$((iteration + 1))
+
+    # Check if history needs compression
+    history_compress
+
     ui_iteration "$iteration" "$REACT_MAX_ITERATIONS"
     ui_thinking
 
