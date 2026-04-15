@@ -13,13 +13,7 @@ Pure-shell AI Agent for system ops engineers. Function Calling + unified Loop ex
 
 ## Architecture
 
-```
-shellbot.sh (entry)
-  → loop.sh (unified Loop: Function Calling + single conversation stream)
-    → tools.sh (dispatch) + tools_schema.sh (OpenAI schema generation)
-    → memory.sh (SQLite3 + FTS5) + compressor.sh (LLM summarization)
-    → history.sh + context.sh + security.sh + ui.sh
-```
+<img src="docs/architecture.svg" alt="ShellBot Architecture" width="900"/>
 
 No separate planner/reflector — Loop mode uses a single conversation stream with Function Calling throughout.
 
