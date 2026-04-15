@@ -1,189 +1,255 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 680" font-family="'Berkeley Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 720" font-family="'JetBrains Mono', 'SF Mono', 'Fira Code', monospace">
   <defs>
-    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6" fill="#333"/>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
     </marker>
-    <marker id="arr-d" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6" fill="#888"/>
+    <marker id="arr-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#0891b2"/>
+    </marker>
+    <marker id="arr-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+    </marker>
+    <marker id="arr-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/>
+    </marker>
+    <marker id="arr-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e11d48"/>
+    </marker>
+    <marker id="arr-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/>
     </marker>
   </defs>
 
   <!-- Background -->
-  <rect width="880" height="680" fill="#fff"/>
+  <rect width="100%" height="100%" fill="#ffffff"/>
 
-  <!-- Title -->
-  <text x="440" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="#000">ShellBot v0.2 — Architecture</text>
+  <!-- ═══════════════════ ARROWS (drawn first → behind components) ═══════════════════ -->
 
-  <!-- ──────── LAYER 1: Entry ──────── -->
-  <rect x="340" y="44" width="200" height="36" rx="4" fill="#000"/>
-  <text x="440" y="67" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">shellbot.sh</text>
+  <!-- shellbot.sh → react.sh (default) -->
+  <line x1="490" y1="82" x2="310" y2="118" stroke="#0891b2" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+  <text x="385" y="92" fill="#64748b" font-size="8" text-anchor="middle">default</text>
 
-  <!-- fork arrows -->
-  <line x1="390" y1="80" x2="220" y2="108" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-  <line x1="490" y1="80" x2="660" y2="108" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-  <text x="280" y="94" font-size="9" fill="#666">default</text>
-  <text x="570" y="94" font-size="9" fill="#666">--loop</text>
+  <!-- shellbot.sh → loop.sh (--loop) -->
+  <line x1="570" y1="82" x2="720" y2="118" stroke="#0891b2" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+  <text x="660" y="92" fill="#64748b" font-size="8" text-anchor="middle">--loop</text>
 
-  <!-- ──────── LAYER 2: Two Modes ──────── -->
-  <rect x="120" y="108" width="200" height="40" rx="4" fill="#333"/>
-  <text x="220" y="131" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">react.sh</text>
-  <text x="220" y="121" text-anchor="middle" font-size="8" fill="#aaa">Single-turn FC</text>
+  <!-- react.sh → api.sh -->
+  <line x1="240" y1="162" x2="190" y2="218" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
 
-  <rect x="560" y="108" width="200" height="40" rx="4" fill="#333"/>
-  <text x="660" y="131" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">loop.sh</text>
-  <text x="660" y="121" text-anchor="middle" font-size="8" fill="#aaa">Multi-turn FC</text>
+  <!-- react.sh → tools.sh -->
+  <line x1="300" y1="162" x2="430" y2="218" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
 
-  <!-- ──────── LAYER 3: Shared Services ──────── -->
-  <!-- react.sh uses -->
-  <line x1="180" y1="148" x2="180" y2="176" stroke="#333" stroke-width="1" marker-end="url(#arr)"/>
-  <line x1="260" y1="148" x2="380" y2="176" stroke="#333" stroke-width="1" marker-end="url(#arr)"/>
-  <line x1="220" y1="148" x2="540" y2="176" stroke="#333" stroke-width="1" marker-end="url(#arr)"/>
+  <!-- react.sh → memory.sh -->
+  <line x1="350" y1="162" x2="700" y2="218" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
 
-  <!-- loop.sh uses -->
-  <line x1="620" y1="148" x2="620" y2="176" stroke="#333" stroke-width="1" marker-end="url(#arr)"/>
-  <line x1="700" y1="148" x2="500" y2="176" stroke="#333" stroke-width="1" marker-end="url(#arr)"/>
-  <line x1="660" y1="148" x2="340" y2="176" stroke="#333" stroke-width="1" marker-end="url(#arr)"/>
+  <!-- loop.sh → api.sh -->
+  <line x1="690" y1="162" x2="220" y2="218" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+  <!-- loop.sh → tools.sh -->
+  <line x1="730" y1="162" x2="490" y2="218" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+  <!-- loop.sh → memory.sh -->
+  <line x1="770" y1="162" x2="760" y2="218" stroke="#059669" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+  <!-- loop.sh → context.sh (loop only) -->
+  <line x1="810" y1="162" x2="880" y2="348" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-emerald)"/>
+  <text x="855" y="270" fill="#64748b" font-size="7" transform="rotate(-90 855 270)">loop only</text>
+
+  <!-- tools.sh → tools/ directory -->
+  <line x1="460" y1="258" x2="460" y2="318" stroke="#ea580c" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+
+  <!-- tools/ → security.sh -->
+  <line x1="200" y1="390" x2="120" y2="438" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-rose)"/>
+
+  <!-- memory.sh → memories.db -->
+  <line x1="760" y1="258" x2="760" y2="438" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-violet)"/>
+
+  <!-- api.sh → OpenRouter -->
+  <line x1="170" y1="258" x2="170" y2="438" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- tools/ → external APIs -->
+  <line x1="600" y1="390" x2="550" y2="438" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- tools/ → RH KB -->
+  <line x1="700" y1="390" x2="750" y2="438" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- history.sh → compressor.sh (lazy source) -->
+  <line x1="860" y1="476" x2="860" y2="530" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+  <text x="876" y="506" fill="#94a3b8" font-size="7">lazy</text>
+
+  <!-- ═══════════════════ LAYER 1: Entry Point ═══════════════════ -->
+
+  <!-- shellbot.sh -->
+  <rect x="430" y="40" width="200" height="42" rx="6" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <text x="530" y="65" fill="#164e63" font-size="12" font-weight="600" text-anchor="middle">shellbot.sh</text>
+  <text x="530" y="76" fill="#0891b2" font-size="7" text-anchor="middle">entry point</text>
+
+  <!-- ═══════════════════ LAYER 2: Two Modes ═══════════════════ -->
+
+  <!-- react.sh -->
+  <rect x="200" y="118" width="180" height="44" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="290" y="142" fill="#064e3b" font-size="11" font-weight="600" text-anchor="middle">react.sh</text>
+  <text x="290" y="155" fill="#64748b" font-size="8" text-anchor="middle">Single-turn FC</text>
+
+  <!-- loop.sh -->
+  <rect x="640" y="118" width="180" height="44" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="730" y="142" fill="#064e3b" font-size="11" font-weight="600" text-anchor="middle">loop.sh</text>
+  <text x="730" y="155" fill="#64748b" font-size="8" text-anchor="middle">Multi-turn FC</text>
+
+  <!-- ═══════════════════ LAYER 3: Core Services ═══════════════════ -->
 
   <!-- api.sh -->
-  <rect x="100" y="176" width="160" height="36" rx="4" fill="#555"/>
-  <text x="180" y="198" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">api.sh</text>
+  <rect x="70" y="218" width="200" height="40" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="170" y="240" fill="#064e3b" font-size="11" font-weight="600" text-anchor="middle">api.sh</text>
+  <text x="170" y="253" fill="#64748b" font-size="8" text-anchor="middle">stream + fallback · OpenRouter</text>
 
-  <!-- tools dispatch -->
-  <rect x="280" y="176" width="280" height="36" rx="4" fill="#555"/>
-  <text x="420" y="198" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">tools.sh + tools_schema.sh</text>
+  <!-- tools.sh + tools_schema.sh -->
+  <rect x="310" y="218" width="300" height="40" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="460" y="240" fill="#064e3b" font-size="11" font-weight="600" text-anchor="middle">tools.sh + tools_schema.sh</text>
+  <text x="460" y="253" fill="#64748b" font-size="8" text-anchor="middle">@tool/@param → OpenAI JSON Schema</text>
 
-  <!-- memory -->
-  <rect x="580" y="176" width="160" height="36" rx="4" fill="#555"/>
-  <text x="660" y="198" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">memory.sh</text>
+  <!-- memory.sh -->
+  <rect x="650" y="218" width="220" height="40" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="760" y="240" fill="#064e3b" font-size="11" font-weight="600" text-anchor="middle">memory.sh</text>
+  <text x="760" y="253" fill="#64748b" font-size="8" text-anchor="middle">SQLite3 + FTS5</text>
 
-  <!-- annotations -->
-  <text x="180" y="225" text-anchor="middle" font-size="8" fill="#888">stream + fallback</text>
-  <text x="180" y="235" text-anchor="middle" font-size="8" fill="#888">OpenRouter API</text>
-  <text x="420" y="225" text-anchor="middle" font-size="8" fill="#888">@tool/@param annotations</text>
-  <text x="420" y="235" text-anchor="middle" font-size="8" fill="#888">→ OpenAI JSON Schema</text>
-  <text x="660" y="225" text-anchor="middle" font-size="8" fill="#888">SQLite3 + FTS5</text>
-  <text x="660" y="235" text-anchor="middle" font-size="8" fill="#888">memories.db</text>
+  <!-- ═══════════════════ LAYER 4: Tool Implementations ═══════════════════ -->
 
-  <!-- ──────── LAYER 4: Tool Implementations ──────── -->
-  <line x1="420" y1="212" x2="420" y2="256" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
+  <!-- tools/ boundary -->
+  <rect x="50" y="318" width="730" height="78" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="62" y="332" fill="#ea580c" font-size="9" font-weight="600">tools/</text>
 
-  <rect x="50" y="256" width="780" height="90" rx="4" fill="none" stroke="#ccc" stroke-width="1"/>
-  <text x="70" y="272" font-size="9" font-weight="600" fill="#666">tools/</text>
+  <!-- run_shell -->
+  <rect x="70" y="342" width="110" height="48" rx="6" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="125" y="362" fill="#7c2d12" font-size="10" font-weight="600" text-anchor="middle">run_shell</text>
+  <text x="125" y="380" fill="#e11d48" font-size="7" text-anchor="middle">→ security.sh</text>
 
-  <!-- Tool boxes inside -->
-  <rect x="70" y="280" width="100" height="52" rx="3" fill="#f5f5f5" stroke="#ddd"/>
-  <text x="120" y="298" text-anchor="middle" font-size="9" font-weight="600" fill="#333">run_shell</text>
-  <text x="120" y="322" text-anchor="middle" font-size="8" fill="#888">→ security.sh</text>
+  <!-- file tools -->
+  <rect x="195" y="342" width="130" height="48" rx="6" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="260" y="360" fill="#7c2d12" font-size="10" font-weight="600" text-anchor="middle">read_file</text>
+  <text x="260" y="374" fill="#64748b" font-size="8" text-anchor="middle">write_file</text>
+  <text x="260" y="386" fill="#64748b" font-size="8" text-anchor="middle">search_files</text>
 
-  <rect x="185" y="280" width="100" height="52" rx="3" fill="#f5f5f5" stroke="#ddd"/>
-  <text x="235" y="298" text-anchor="middle" font-size="9" font-weight="600" fill="#333">read_file</text>
-  <text x="235" y="310" text-anchor="middle" font-size="8" fill="#888">write_file</text>
-  <text x="235" y="322" text-anchor="middle" font-size="8" fill="#888">search_files</text>
+  <!-- list_files + calc -->
+  <rect x="340" y="342" width="100" height="48" rx="6" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="390" y="362" fill="#7c2d12" font-size="10" font-weight="600" text-anchor="middle">list_files</text>
+  <text x="390" y="380" fill="#64748b" font-size="8" text-anchor="middle">calc</text>
 
-  <rect x="300" y="280" width="100" height="52" rx="3" fill="#f5f5f5" stroke="#ddd"/>
-  <text x="350" y="298" text-anchor="middle" font-size="9" font-weight="600" fill="#333">list_files</text>
-  <text x="350" y="310" text-anchor="middle" font-size="8" fill="#888">calc</text>
+  <!-- plan_step (loop only) -->
+  <rect x="455" y="342" width="100" height="48" rx="6" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="505" y="362" fill="#7c2d12" font-size="10" font-weight="600" text-anchor="middle">plan_step</text>
+  <text x="505" y="380" fill="#64748b" font-size="7" text-anchor="middle">loop only</text>
 
-  <rect x="415" y="280" width="100" height="52" rx="3" fill="#f5f5f5" stroke="#ddd"/>
-  <text x="465" y="298" text-anchor="middle" font-size="9" font-weight="600" fill="#333">plan_step</text>
-  <text x="465" y="322" text-anchor="middle" font-size="8" fill="#888">(loop only)</text>
+  <!-- web tools -->
+  <rect x="570" y="342" width="100" height="48" rx="6" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="620" y="360" fill="#7c2d12" font-size="10" font-weight="600" text-anchor="middle">search_web</text>
+  <text x="620" y="374" fill="#64748b" font-size="8" text-anchor="middle">read_webpage</text>
+  <text x="620" y="386" fill="#64748b" font-size="8" text-anchor="middle">search/read_rhkb</text>
 
-  <rect x="530" y="280" width="140" height="52" rx="3" fill="#f5f5f5" stroke="#ddd"/>
-  <text x="600" y="298" text-anchor="middle" font-size="9" font-weight="600" fill="#333">search_web</text>
-  <text x="600" y="310" text-anchor="middle" font-size="8" fill="#888">read_webpage</text>
-  <text x="600" y="322" text-anchor="middle" font-size="8" fill="#888">search/read_rhkb</text>
+  <!-- memory tools -->
+  <rect x="685" y="342" width="85" height="48" rx="6" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="728" y="360" fill="#7c2d12" font-size="9" font-weight="600" text-anchor="middle">save_mem</text>
+  <text x="728" y="374" fill="#64748b" font-size="8" text-anchor="middle">search_mem</text>
+  <text x="728" y="386" fill="#64748b" font-size="7" text-anchor="middle">→ memory.sh</text>
 
-  <rect x="685" y="280" width="120" height="52" rx="3" fill="#f5f5f5" stroke="#ddd"/>
-  <text x="745" y="298" text-anchor="middle" font-size="9" font-weight="600" fill="#333">save_memory</text>
-  <text x="745" y="310" text-anchor="middle" font-size="8" fill="#888">search_memory</text>
-  <text x="745" y="322" text-anchor="middle" font-size="8" fill="#888">→ memory.sh</text>
+  <!-- ═══════════════════ LAYER 5: Supporting Libraries ═══════════════════ -->
 
-  <!-- ──────── LAYER 5: Supporting Libs ──────── -->
-  <!-- loop.sh also uses these directly -->
-  <line x1="660" y1="148" x2="750" y2="380" stroke="#333" stroke-width="0.8" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
-  <line x1="660" y1="148" x2="550" y2="380" stroke="#333" stroke-width="0.8" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
+  <!-- security.sh -->
+  <rect x="40" y="438" width="160" height="38" rx="6" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+  <text x="120" y="458" fill="#881337" font-size="10" font-weight="600" text-anchor="middle">security.sh</text>
+  <text x="120" y="470" fill="#64748b" font-size="8" text-anchor="middle">dangerous cmd detection</text>
 
-  <rect x="50" y="380" width="150" height="36" rx="4" fill="#888"/>
-  <text x="125" y="402" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">security.sh</text>
+  <!-- ui.sh -->
+  <rect x="220" y="438" width="130" height="38" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="285" y="458" fill="#334155" font-size="10" font-weight="600" text-anchor="middle">ui.sh</text>
+  <text x="285" y="470" fill="#64748b" font-size="8" text-anchor="middle">spinner · output fmt</text>
 
-  <rect x="220" y="380" width="150" height="36" rx="4" fill="#888"/>
-  <text x="295" y="402" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">ui.sh</text>
+  <!-- config.sh -->
+  <rect x="370" y="438" width="130" height="38" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="435" y="458" fill="#334155" font-size="10" font-weight="600" text-anchor="middle">config.sh</text>
+  <text x="435" y="470" fill="#64748b" font-size="8" text-anchor="middle">env · constants · paths</text>
 
-  <rect x="390" y="380" width="150" height="36" rx="4" fill="#888"/>
-  <text x="465" y="402" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">context.sh</text>
-  <text x="465" y="393" text-anchor="middle" font-size="7" fill="#bbb">loop only</text>
+  <!-- context.sh (loop only) -->
+  <rect x="810" y="348" width="150" height="38" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="885" y="368" fill="#064e3b" font-size="10" font-weight="600" text-anchor="middle">context.sh</text>
+  <text x="885" y="380" fill="#64748b" font-size="8" text-anchor="middle">goal tracking · steps</text>
 
-  <rect x="560" y="380" width="150" height="36" rx="4" fill="#888"/>
-  <text x="635" y="402" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">history.sh</text>
+  <!-- history.sh -->
+  <rect x="780" y="438" width="160" height="38" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="860" y="458" fill="#334155" font-size="10" font-weight="600" text-anchor="middle">history.sh</text>
+  <text x="860" y="470" fill="#64748b" font-size="8" text-anchor="middle">JSON msgs · auto-compress</text>
 
-  <rect x="730" y="380" width="110" height="36" rx="4" fill="#888"/>
-  <text x="785" y="402" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">config.sh</text>
+  <!-- compressor.sh (lazy-loaded) -->
+  <rect x="760" y="530" width="200" height="38" rx="6" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="860" y="550" fill="#64748b" font-size="10" font-weight="600" text-anchor="middle">compressor.sh</text>
+  <text x="860" y="562" fill="#94a3b8" font-size="8" text-anchor="middle">LLM-based summarization</text>
 
-  <!-- annotations under -->
-  <text x="125" y="428" text-anchor="middle" font-size="8" fill="#888">dangerous cmd</text>
-  <text x="125" y="438" text-anchor="middle" font-size="8" fill="#888">detection</text>
-  <text x="295" y="428" text-anchor="middle" font-size="8" fill="#888">spinner, output</text>
-  <text x="295" y="438" text-anchor="middle" font-size="8" fill="#888">formatting</text>
-  <text x="465" y="428" text-anchor="middle" font-size="8" fill="#888">goal tracking</text>
-  <text x="465" y="438" text-anchor="middle" font-size="8" fill="#888">step recording</text>
-  <text x="635" y="428" text-anchor="middle" font-size="8" fill="#888">JSON messages</text>
-  <text x="635" y="438" text-anchor="middle" font-size="8" fill="#888">auto-compress</text>
-  <text x="785" y="428" text-anchor="middle" font-size="8" fill="#888">env, constants</text>
-  <text x="785" y="438" text-anchor="middle" font-size="8" fill="#888">data paths</text>
+  <!-- ═══════════════════ LAYER 6: Prompts ═══════════════════ -->
 
-  <!-- ──────── LAYER 6: Compressor (lazy-loaded) ──────── -->
-  <line x1="635" y1="416" x2="635" y2="476" stroke="#333" stroke-width="0.8" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
-  <text x="665" y="454" font-size="8" fill="#888">lazy source</text>
+  <!-- prompts/system.sh -->
+  <rect x="520" y="438" width="120" height="38" rx="6" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="580" y="460" fill="#64748b" font-size="9" font-weight="600" text-anchor="middle">prompts/system.sh</text>
 
-  <rect x="540" y="476" width="200" height="36" rx="4" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="640" y="498" text-anchor="middle" font-size="10" font-weight="600" fill="#333">compressor.sh</text>
-  <text x="640" y="486" text-anchor="middle" font-size="7" fill="#888">LLM-based summarization</text>
+  <!-- prompts/loop_system.sh -->
+  <rect x="660" y="438" width="110" height="38" rx="6" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="715" y="456" fill="#64748b" font-size="9" font-weight="600" text-anchor="middle">loop_system.sh</text>
+  <text x="715" y="468" fill="#94a3b8" font-size="7" text-anchor="middle">loop only</text>
 
-  <!-- ──────── Prompts ──────── -->
-  <rect x="50" y="476" width="200" height="36" rx="4" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="150" y="498" text-anchor="middle" font-size="10" font-weight="600" fill="#333">prompts/system.sh</text>
+  <!-- ═══════════════════ EXTERNAL SERVICES ═══════════════════ -->
 
-  <rect x="270" y="476" width="220" height="36" rx="4" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="380" y="498" text-anchor="middle" font-size="10" font-weight="600" fill="#333">prompts/loop_system.sh</text>
-  <text x="380" y="487" text-anchor="middle" font-size="7" fill="#888">loop only</text>
+  <!-- OpenRouter API -->
+  <rect x="70" y="530" width="200" height="38" rx="6" fill="none" stroke="#d97706" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="170" y="552" fill="#92400e" font-size="10" font-weight="600" text-anchor="middle">OpenRouter API</text>
+  <text x="170" y="563" fill="#64748b" font-size="7" text-anchor="middle">LLM inference</text>
 
-  <!-- ──────── External ──────── -->
-  <rect x="50" y="556" width="250" height="36" rx="4" fill="none" stroke="#aaa" stroke-width="1" stroke-dasharray="3,3"/>
-  <text x="175" y="578" text-anchor="middle" font-size="9" font-weight="600" fill="#888">OpenRouter API (LLM)</text>
+  <!-- Tavily / JINA -->
+  <rect x="300" y="530" width="200" height="38" rx="6" fill="none" stroke="#d97706" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="400" y="552" fill="#92400e" font-size="10" font-weight="600" text-anchor="middle">Tavily / JINA Reader</text>
+  <text x="400" y="563" fill="#64748b" font-size="7" text-anchor="middle">Web search · page fetch</text>
 
-  <rect x="320" y="556" width="220" height="36" rx="4" fill="none" stroke="#aaa" stroke-width="1" stroke-dasharray="3,3"/>
-  <text x="430" y="578" text-anchor="middle" font-size="9" font-weight="600" fill="#888">Tavily / JINA Reader</text>
+  <!-- Red Hat KB -->
+  <rect x="530" y="530" width="200" height="38" rx="6" fill="none" stroke="#d97706" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="630" y="552" fill="#92400e" font-size="10" font-weight="600" text-anchor="middle">Red Hat KB</text>
+  <text x="630" y="563" fill="#64748b" font-size="7" text-anchor="middle">SSO authenticated</text>
 
-  <rect x="560" y="556" width="200" height="36" rx="4" fill="none" stroke="#aaa" stroke-width="1" stroke-dasharray="3,3"/>
-  <text x="660" y="578" text-anchor="middle" font-size="9" font-weight="600" fill="#888">Red Hat KB (SSO)</text>
+  <!-- arrows from api/external to external -->
+  <line x1="170" y1="476" x2="170" y2="528" stroke="#d97706" stroke-width="1" marker-end="url(#arrowhead)"/>
+  <line x1="620" y1="396" x2="500" y2="528" stroke="#d97706" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
+  <line x1="640" y1="396" x2="630" y2="528" stroke="#d97706" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
 
-  <!-- arrows from api/tools to external -->
-  <line x1="180" y1="212" x2="175" y2="556" stroke="#aaa" stroke-width="0.8" stroke-dasharray="3,3" marker-end="url(#arr-d)"/>
-  <line x1="600" y1="332" x2="430" y2="556" stroke="#aaa" stroke-width="0.8" stroke-dasharray="3,3" marker-end="url(#arr-d)"/>
+  <!-- ═══════════════════ DATA STORES ═══════════════════ -->
 
-  <!-- ──────── Data ──────── -->
-  <rect x="50" y="610" width="350" height="36" rx="4" fill="none" stroke="#aaa" stroke-width="1" stroke-dasharray="3,3"/>
-  <text x="225" y="632" text-anchor="middle" font-size="9" font-weight="600" fill="#888">~/.shellbot/  (history.json, context.json)</text>
+  <!-- ~/.shellbot/ -->
+  <rect x="70" y="610" width="300" height="38" rx="6" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="220" y="632" fill="#5b21b6" font-size="9" font-weight="600" text-anchor="middle">~/.shellbot/</text>
+  <text x="220" y="643" fill="#64748b" font-size="7" text-anchor="middle">history.json · context.json</text>
 
-  <rect x="420" y="610" width="340" height="36" rx="4" fill="none" stroke="#aaa" stroke-width="1" stroke-dasharray="3,3"/>
-  <text x="590" y="632" text-anchor="middle" font-size="9" font-weight="600" fill="#888">~/.shellbot/memories.db  (SQLite3+FTS5)</text>
+  <!-- memories.db -->
+  <rect x="400" y="610" width="250" height="38" rx="6" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="525" y="632" fill="#5b21b6" font-size="9" font-weight="600" text-anchor="middle">~/.shellbot/memories.db</text>
+  <text x="525" y="643" fill="#64748b" font-size="7" text-anchor="middle">SQLite3 + FTS5</text>
 
-  <!-- ──────── Legend ──────── -->
-  <rect x="50" y="654" width="780" height="20" rx="3" fill="#f8f8f8"/>
-  <line x1="60" y1="664" x2="85" y2="664" stroke="#333" stroke-width="1.2" marker-end="url(#arr)"/>
-  <text x="90" y="668" font-size="8" fill="#666">source/call</text>
-  <line x1="160" y1="664" x2="185" y2="664" stroke="#333" stroke-width="0.8" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
-  <text x="190" y="668" font-size="8" fill="#666">indirect/lazy</text>
-  <rect x="270" y="658" width="12" height="12" rx="2" fill="#000"/>
-  <text x="288" y="668" font-size="8" fill="#666">entry</text>
-  <rect x="320" y="658" width="12" height="12" rx="2" fill="#333"/>
-  <text x="338" y="668" font-size="8" fill="#666">mode</text>
-  <rect x="370" y="658" width="12" height="12" rx="2" fill="#555"/>
-  <text x="388" y="668" font-size="8" fill="#666">service</text>
-  <rect x="430" y="658" width="12" height="12" rx="2" fill="#888"/>
-  <text x="448" y="668" font-size="8" fill="#666">support</text>
-  <rect x="500" y="658" width="12" height="12" rx="2" fill="none" stroke="#333" stroke-dasharray="3,2"/>
-  <text x="518" y="668" font-size="8" fill="#666">lazy/on-demand</text>
-  <rect x="600" y="658" width="12" height="12" rx="2" fill="none" stroke="#aaa" stroke-dasharray="2,2"/>
-  <text x="618" y="668" font-size="8" fill="#666">external/data</text>
+  <!-- data store arrows -->
+  <line x1="760" y1="476" x2="525" y2="608" stroke="#7c3aed" stroke-width="1" marker-end="url(#arr-violet)"/>
+
+  <!-- ═══════════════════ LEGEND ═══════════════════ -->
+  <text x="880" y="622" fill="#1e293b" font-size="10" font-weight="600">Legend</text>
+
+  <rect x="880" y="634" width="14" height="9" rx="2" fill="#ecfeff" stroke="#0891b2" stroke-width="1"/>
+  <text x="900" y="641" fill="#64748b" font-size="8">Entry</text>
+
+  <rect x="880" y="649" width="14" height="9" rx="2" fill="#ecfdf5" stroke="#059669" stroke-width="1"/>
+  <text x="900" y="656" fill="#64748b" font-size="8">Service</text>
+
+  <rect x="880" y="664" width="14" height="9" rx="2" fill="#fff7ed" stroke="#ea580c" stroke-width="1"/>
+  <text x="900" y="671" fill="#64748b" font-size="8">Tool Impl</text>
+
+  <rect x="880" y="679" width="14" height="9" rx="2" fill="#fff1f2" stroke="#e11d48" stroke-width="1"/>
+  <text x="900" y="686" fill="#64748b" font-size="8">Security</text>
+
+  <rect x="880" y="694" width="14" height="9" rx="2" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="900" y="701" fill="#64748b" font-size="8">Database</text>
+
+  <line x1="880" y1="711" x2="894" y2="711" stroke="#d97706" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="900" y="714" fill="#64748b" font-size="8">External</text>
 </svg>
