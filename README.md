@@ -15,8 +15,6 @@ Pure-shell AI Agent for system ops engineers. Function Calling + unified Loop ex
 
 <img src="docs/architecture.svg" alt="ShellBot Architecture" width="900"/>
 
-> 🌑 [Dark-themed interactive version](docs/architecture.html) — open in browser
-
 No separate planner/reflector — Loop mode uses a single conversation stream with Function Calling throughout.
 
 ## Dependencies
