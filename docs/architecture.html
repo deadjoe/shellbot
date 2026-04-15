@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShellBot v0.2 Architecture Diagram</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; }
+    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .pulse-dot {
+      width: 12px; height: 12px; background: #22d3ee; border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+    .subtitle { color: #94a3b8; font-size: 0.875rem; margin-left: 1.75rem; }
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.5); border-radius: 1rem;
+      border: 1px solid #1e293b; padding: 1.5rem; overflow-x: auto;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem; margin-top: 2rem;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.5); border-radius: 0.75rem;
+      border: 1px solid #1e293b; padding: 1.25rem;
+    }
+    .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+    .card-dot.rose { background: #fb7185; }
+    .card-dot.orange { background: #fb923c; }
+    .card h3 { font-size: 0.875rem; font-weight: 600; }
+    .card ul { list-style: none; color: #94a3b8; font-size: 0.75rem; }
+    .card li { margin-bottom: 0.375rem; }
+    .footer { text-align: center; margin-top: 1.5rem; color: #475569; font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>ShellBot v0.2 Architecture</h1>
+      </div>
+      <p class="subtitle">Bash-native AI agent — Function Calling with @tool annotations → OpenAI JSON Schema</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1060 720">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+          </marker>
+          <marker id="arr-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee"/>
+          </marker>
+          <marker id="arr-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
+          </marker>
+          <marker id="arr-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
+          </marker>
+          <marker id="arr-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb7185"/>
+          </marker>
+          <marker id="arr-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb923c"/>
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#grid)"/>
+
+        <!-- ═══════════════════ ARROWS (drawn first → behind components) ═══════════════════ -->
+
+        <!-- shellbot.sh → react.sh (default) -->
+        <line x1="490" y1="82" x2="310" y2="118" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+        <text x="385" y="92" fill="#94a3b8" font-size="8" text-anchor="middle">default</text>
+
+        <!-- shellbot.sh → loop.sh (--loop) -->
+        <line x1="570" y1="82" x2="720" y2="118" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+        <text x="660" y="92" fill="#94a3b8" font-size="8" text-anchor="middle">--loop</text>
+
+        <!-- react.sh → api.sh -->
+        <line x1="240" y1="162" x2="190" y2="218" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+        <!-- react.sh → tools.sh -->
+        <line x1="300" y1="162" x2="430" y2="218" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+        <!-- react.sh → memory.sh -->
+        <line x1="350" y1="162" x2="700" y2="218" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+        <!-- loop.sh → api.sh -->
+        <line x1="690" y1="162" x2="220" y2="218" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+        <!-- loop.sh → tools.sh -->
+        <line x1="730" y1="162" x2="490" y2="218" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+        <!-- loop.sh → memory.sh -->
+        <line x1="770" y1="162" x2="760" y2="218" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+        <!-- loop.sh → context.sh (loop only) -->
+        <line x1="810" y1="162" x2="880" y2="348" stroke="#34d399" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-emerald)"/>
+        <text x="855" y="270" fill="#94a3b8" font-size="7" transform="rotate(-90 855 270)">loop only</text>
+
+        <!-- tools.sh → tools/ directory -->
+        <line x1="460" y1="258" x2="460" y2="318" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+
+        <!-- tools/ → security.sh -->
+        <line x1="200" y1="390" x2="120" y2="438" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-rose)"/>
+
+        <!-- memory.sh → memories.db -->
+        <line x1="760" y1="258" x2="760" y2="438" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arr-violet)"/>
+
+        <!-- api.sh → OpenRouter -->
+        <line x1="170" y1="258" x2="170" y2="438" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- tools/ → external APIs -->
+        <line x1="600" y1="390" x2="550" y2="438" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- tools/ → RH KB -->
+        <line x1="700" y1="390" x2="750" y2="438" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- history.sh → compressor.sh (lazy source) -->
+        <line x1="860" y1="476" x2="860" y2="530" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+        <text x="876" y="506" fill="#94a3b8" font-size="7">lazy</text>
+
+        <!-- ═══════════════════ LAYER 1: Entry Point ═══════════════════ -->
+
+        <!-- shellbot.sh -->
+        <rect x="430" y="40" width="200" height="42" rx="6" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+        <rect x="430" y="40" width="200" height="42" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="530" y="65" fill="white" font-size="12" font-weight="600" text-anchor="middle">shellbot.sh</text>
+        <text x="530" y="76" fill="#22d3ee" font-size="7" text-anchor="middle">entry point</text>
+
+        <!-- ═══════════════════ LAYER 2: Two Modes ═══════════════════ -->
+
+        <!-- react.sh -->
+        <rect x="200" y="118" width="180" height="44" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+        <rect x="200" y="118" width="180" height="44" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="290" y="142" fill="white" font-size="11" font-weight="600" text-anchor="middle">react.sh</text>
+        <text x="290" y="155" fill="#94a3b8" font-size="8" text-anchor="middle">Single-turn FC</text>
+
+        <!-- loop.sh -->
+        <rect x="640" y="118" width="180" height="44" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+        <rect x="640" y="118" width="180" height="44" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="730" y="142" fill="white" font-size="11" font-weight="600" text-anchor="middle">loop.sh</text>
+        <text x="730" y="155" fill="#94a3b8" font-size="8" text-anchor="middle">Multi-turn FC</text>
+
+        <!-- ═══════════════════ LAYER 3: Core Services ═══════════════════ -->
+
+        <!-- api.sh -->
+        <rect x="70" y="218" width="200" height="40" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+        <rect x="70" y="218" width="200" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="170" y="240" fill="white" font-size="11" font-weight="600" text-anchor="middle">api.sh</text>
+        <text x="170" y="253" fill="#94a3b8" font-size="8" text-anchor="middle">stream + fallback · OpenRouter</text>
+
+        <!-- tools.sh + tools_schema.sh -->
+        <rect x="310" y="218" width="300" height="40" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+        <rect x="310" y="218" width="300" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="460" y="240" fill="white" font-size="11" font-weight="600" text-anchor="middle">tools.sh + tools_schema.sh</text>
+        <text x="460" y="253" fill="#94a3b8" font-size="8" text-anchor="middle">@tool/@param → OpenAI JSON Schema</text>
+
+        <!-- memory.sh -->
+        <rect x="650" y="218" width="220" height="40" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+        <rect x="650" y="218" width="220" height="40" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="760" y="240" fill="white" font-size="11" font-weight="600" text-anchor="middle">memory.sh</text>
+        <text x="760" y="253" fill="#94a3b8" font-size="8" text-anchor="middle">SQLite3 + FTS5</text>
+
+        <!-- ═══════════════════ LAYER 4: Tool Implementations ═══════════════════ -->
+
+        <!-- tools/ boundary -->
+        <rect x="50" y="318" width="730" height="78" rx="8" fill="rgba(251, 146, 60, 0.05)" stroke="#fb923c" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="62" y="332" fill="#fb923c" font-size="9" font-weight="600">tools/</text>
+
+        <!-- run_shell -->
+        <rect x="70" y="342" width="110" height="48" rx="6" fill="#0f172a" stroke="#fb923c" stroke-width="1.5"/>
+        <rect x="70" y="342" width="110" height="48" rx="6" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="125" y="362" fill="white" font-size="10" font-weight="600" text-anchor="middle">run_shell</text>
+        <text x="125" y="380" fill="#fb7185" font-size="7" text-anchor="middle">→ security.sh</text>
+
+        <!-- file tools -->
+        <rect x="195" y="342" width="130" height="48" rx="6" fill="#0f172a" stroke="#fb923c" stroke-width="1.5"/>
+        <rect x="195" y="342" width="130" height="48" rx="6" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="260" y="360" fill="white" font-size="10" font-weight="600" text-anchor="middle">read_file</text>
+        <text x="260" y="374" fill="#94a3b8" font-size="8" text-anchor="middle">write_file</text>
+        <text x="260" y="386" fill="#94a3b8" font-size="8" text-anchor="middle">search_files</text>
+
+        <!-- list_files + calc -->
+        <rect x="340" y="342" width="100" height="48" rx="6" fill="#0f172a" stroke="#fb923c" stroke-width="1.5"/>
+        <rect x="340" y="342" width="100" height="48" rx="6" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="390" y="362" fill="white" font-size="10" font-weight="600" text-anchor="middle">list_files</text>
+        <text x="390" y="380" fill="#94a3b8" font-size="8" text-anchor="middle">calc</text>
+
+        <!-- plan_step (loop only) -->
+        <rect x="455" y="342" width="100" height="48" rx="6" fill="#0f172a" stroke="#fb923c" stroke-width="1.5"/>
+        <rect x="455" y="342" width="100" height="48" rx="6" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="505" y="362" fill="white" font-size="10" font-weight="600" text-anchor="middle">plan_step</text>
+        <text x="505" y="380" fill="#94a3b8" font-size="7" text-anchor="middle">loop only</text>
+
+        <!-- web tools -->
+        <rect x="570" y="342" width="100" height="48" rx="6" fill="#0f172a" stroke="#fb923c" stroke-width="1.5"/>
+        <rect x="570" y="342" width="100" height="48" rx="6" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="620" y="360" fill="white" font-size="10" font-weight="600" text-anchor="middle">search_web</text>
+        <text x="620" y="374" fill="#94a3b8" font-size="8" text-anchor="middle">read_webpage</text>
+        <text x="620" y="386" fill="#94a3b8" font-size="8" text-anchor="middle">search/read_rhkb</text>
+
+        <!-- memory tools -->
+        <rect x="685" y="342" width="85" height="48" rx="6" fill="#0f172a" stroke="#fb923c" stroke-width="1.5"/>
+        <rect x="685" y="342" width="85" height="48" rx="6" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="728" y="360" fill="white" font-size="9" font-weight="600" text-anchor="middle">save_mem</text>
+        <text x="728" y="374" fill="#94a3b8" font-size="8" text-anchor="middle">search_mem</text>
+        <text x="728" y="386" fill="#94a3b8" font-size="7" text-anchor="middle">→ memory.sh</text>
+
+        <!-- ═══════════════════ LAYER 5: Supporting Libraries ═══════════════════ -->
+
+        <!-- security.sh -->
+        <rect x="40" y="438" width="160" height="38" rx="6" fill="#0f172a" stroke="#fb7185" stroke-width="1.5"/>
+        <rect x="40" y="438" width="160" height="38" rx="6" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="120" y="458" fill="white" font-size="10" font-weight="600" text-anchor="middle">security.sh</text>
+        <text x="120" y="470" fill="#94a3b8" font-size="8" text-anchor="middle">dangerous cmd detection</text>
+
+        <!-- ui.sh -->
+        <rect x="220" y="438" width="130" height="38" rx="6" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/>
+        <rect x="220" y="438" width="130" height="38" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="285" y="458" fill="white" font-size="10" font-weight="600" text-anchor="middle">ui.sh</text>
+        <text x="285" y="470" fill="#94a3b8" font-size="8" text-anchor="middle">spinner · output fmt</text>
+
+        <!-- config.sh -->
+        <rect x="370" y="438" width="130" height="38" rx="6" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/>
+        <rect x="370" y="438" width="130" height="38" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="435" y="458" fill="white" font-size="10" font-weight="600" text-anchor="middle">config.sh</text>
+        <text x="435" y="470" fill="#94a3b8" font-size="8" text-anchor="middle">env · constants · paths</text>
+
+        <!-- context.sh (loop only) -->
+        <rect x="810" y="348" width="150" height="38" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+        <rect x="810" y="348" width="150" height="38" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="885" y="368" fill="white" font-size="10" font-weight="600" text-anchor="middle">context.sh</text>
+        <text x="885" y="380" fill="#94a3b8" font-size="8" text-anchor="middle">goal tracking · steps</text>
+
+        <!-- history.sh -->
+        <rect x="780" y="438" width="160" height="38" rx="6" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/>
+        <rect x="780" y="438" width="160" height="38" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="860" y="458" fill="white" font-size="10" font-weight="600" text-anchor="middle">history.sh</text>
+        <text x="860" y="470" fill="#94a3b8" font-size="8" text-anchor="middle">JSON msgs · auto-compress</text>
+
+        <!-- compressor.sh (lazy-loaded) -->
+        <rect x="760" y="530" width="200" height="38" rx="6" fill="none" stroke="#64748b" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="860" y="550" fill="#94a3b8" font-size="10" font-weight="600" text-anchor="middle">compressor.sh</text>
+        <text x="860" y="562" fill="#64748b" font-size="8" text-anchor="middle">LLM-based summarization</text>
+
+        <!-- ═══════════════════ LAYER 6: Prompts ═══════════════════ -->
+
+        <!-- prompts/system.sh -->
+        <rect x="520" y="438" width="120" height="38" rx="6" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="580" y="460" fill="#94a3b8" font-size="9" font-weight="600" text-anchor="middle">prompts/system.sh</text>
+
+        <!-- prompts/loop_system.sh -->
+        <rect x="660" y="438" width="110" height="38" rx="6" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="715" y="456" fill="#94a3b8" font-size="9" font-weight="600" text-anchor="middle">loop_system.sh</text>
+        <text x="715" y="468" fill="#64748b" font-size="7" text-anchor="middle">loop only</text>
+
+        <!-- ═══════════════════ EXTERNAL SERVICES ═══════════════════ -->
+
+        <!-- OpenRouter API -->
+        <rect x="70" y="530" width="200" height="38" rx="6" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="170" y="552" fill="#fbbf24" font-size="10" font-weight="600" text-anchor="middle">OpenRouter API</text>
+        <text x="170" y="563" fill="#94a3b8" font-size="7" text-anchor="middle">LLM inference</text>
+
+        <!-- Tavily / JINA -->
+        <rect x="300" y="530" width="200" height="38" rx="6" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="400" y="552" fill="#fbbf24" font-size="10" font-weight="600" text-anchor="middle">Tavily / JINA Reader</text>
+        <text x="400" y="563" fill="#94a3b8" font-size="7" text-anchor="middle">Web search · page fetch</text>
+
+        <!-- Red Hat KB -->
+        <rect x="530" y="530" width="200" height="38" rx="6" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="630" y="552" fill="#fbbf24" font-size="10" font-weight="600" text-anchor="middle">Red Hat KB</text>
+        <text x="630" y="563" fill="#94a3b8" font-size="7" text-anchor="middle">SSO authenticated</text>
+
+        <!-- arrows from api/external to external -->
+        <line x1="170" y1="476" x2="170" y2="528" stroke="#fbbf24" stroke-width="1" marker-end="url(#arrowhead)"/>
+        <line x1="620" y1="396" x2="500" y2="528" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
+        <line x1="640" y1="396" x2="630" y2="528" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
+
+        <!-- ═══════════════════ DATA STORES ═══════════════════ -->
+
+        <!-- ~/.shellbot/ -->
+        <rect x="70" y="610" width="300" height="38" rx="6" fill="none" stroke="#a78bfa" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="220" y="632" fill="#a78bfa" font-size="9" font-weight="600" text-anchor="middle">~/.shellbot/</text>
+        <text x="220" y="643" fill="#94a3b8" font-size="7" text-anchor="middle">history.json · context.json</text>
+
+        <!-- memories.db -->
+        <rect x="400" y="610" width="250" height="38" rx="6" fill="none" stroke="#a78bfa" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="525" y="632" fill="#a78bfa" font-size="9" font-weight="600" text-anchor="middle">~/.shellbot/memories.db</text>
+        <text x="525" y="643" fill="#94a3b8" font-size="7" text-anchor="middle">SQLite3 + FTS5</text>
+
+        <!-- data store arrows -->
+        <line x1="760" y1="476" x2="525" y2="608" stroke="#a78bfa" stroke-width="1" marker-end="url(#arr-violet)"/>
+
+        <!-- ═══════════════════ LEGEND ═══════════════════ -->
+        <text x="880" y="622" fill="white" font-size="10" font-weight="600">Legend</text>
+
+        <rect x="880" y="634" width="14" height="9" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="900" y="641" fill="#94a3b8" font-size="8">Entry / Frontend</text>
+
+        <rect x="880" y="649" width="14" height="9" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
+        <text x="900" y="656" fill="#94a3b8" font-size="8">Backend / Service</text>
+
+        <rect x="880" y="664" width="14" height="9" rx="2" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1"/>
+        <text x="900" y="671" fill="#94a3b8" font-size="8">Tool Implementation</text>
+
+        <rect x="880" y="679" width="14" height="9" rx="2" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1"/>
+        <text x="900" y="686" fill="#94a3b8" font-size="8">Security</text>
+
+        <rect x="880" y="694" width="14" height="9" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="900" y="701" fill="#94a3b8" font-size="8">Database / Storage</text>
+
+        <line x1="880" y1="711" x2="894" y2="711" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="900" y="714" fill="#94a3b8" font-size="8">External Service</text>
+      </svg>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot emerald"></div>
+          <h3>Two Execution Modes</h3>
+        </div>
+        <ul>
+          <li>• react.sh — Single-turn function calling (default)</li>
+          <li>• loop.sh — Multi-turn autonomous loop (--loop)</li>
+          <li>• Both share api.sh, tools.sh, memory.sh</li>
+          <li>• context.sh only used in loop mode</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot orange"></div>
+          <h3>14 Tool Implementations</h3>
+        </div>
+        <ul>
+          <li>• Shell: run_shell, read/write/search_files</li>
+          <li>• Web: search_web, read_webpage</li>
+          <li>• KB: search/read_rhkb (Red Hat SSO)</li>
+          <li>• Memory: save/search_memory → SQLite3</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>Schema Generation</h3>
+        </div>
+        <ul>
+          <li>• @tool/@param annotations in Bash comments</li>
+          <li>• tools_schema.sh → OpenAI JSON Schema</li>
+          <li>• Zero Python dependency for core loop</li>
+          <li>• Lazy-loaded compressor (LLM summarize)</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer">
+      ShellBot v0.2 · Pure Bash AI Agent · github.com/deadjoe/shellbot
+    </p>
+  </div>
+</body>
+</html>
