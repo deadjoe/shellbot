@@ -29,7 +29,7 @@
   <line x1="490" y1="82" x2="310" y2="118" stroke="#0891b2" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
   <text x="385" y="92" fill="#64748b" font-size="8" text-anchor="middle">default</text>
 
-  <!-- shellbot.sh → loop.sh (--loop) -->
+  <!-- shellbot.sh → loop.sh (loop flag) -->
   <line x1="570" y1="82" x2="720" y2="118" stroke="#0891b2" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
   <text x="660" y="92" fill="#64748b" font-size="8" text-anchor="middle">--loop</text>
 
